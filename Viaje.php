@@ -9,7 +9,7 @@ class Viaje{
  private $codigoViaje; // INT
  private $destinoViaje; // STRING
  private $cantMaxima;   // INT
- private $pasajeros;    // ARRAY ASOCIATIVO 
+ private $pasajeros;    // ARRAY DE OBJETOS
  
  
  // ***CONSTRUCTOR***
@@ -97,11 +97,18 @@ class Viaje{
 
  // ***METODO MODIFICAR PASAJERO***
 /**Este metodo modifica los datos del pasajero
- * @param pasajero  // array asociativo
- * @return array  
+ * @param viajero  // array de objetos pasajeros 
+ * @return obj
  */
-function modificarPasajero($pasajero){
-    // STRING: key, eleccion                INT: contar 
+function modificarPasajero($viajeros){
+    // STRING: key, eleccion                INT: nro    OBJ: objPasajeros   ARRAy: pasajero
+    echo("Hay ".sizeof($viajeros)." pasajeros"."\n"."¿Que Nro de pasajero quiere modificar? \n");
+    $nro=trim(fgets(STDIN));
+    $objPasajero=$viajeros[$nro]; // selecciona al pasajero que va a modificar los datos
+    
+    // Almacena en una array asociativo los atributos del objeto pasajero. (Para usar la misma estructura del foreach y while)
+    $pasajero=array("Nombre"=>$objPasajero->getNombre(),"Apellido"=>$objPasajero->getApellido(),"dni"=>$objPasajero->getDni(),"telefono"=>$objPasajero->getTelefono());
+
     foreach($pasajero as $key=>$dato){
         echo("¿Quiere cambiar ".$key." del pasajero? SI/NO  \n");
         $eleccion=strtoupper(trim(fgets(STDIN)));
@@ -116,18 +123,81 @@ function modificarPasajero($pasajero){
         }// fin while 
 
     }// fin foreach 
-    return $pasajero;
+    $objPasajero->setNombre($pasajero["Nombre"]);
+    $objPasajero->setApellido($pasajero["Apellido"]);
+    $objPasajero->setDni($pasajero["dni"]);
+    $objPasajero->setTelefono($pasajero["telefono"]);
+
+    return $objPasajero;
 
 }// fin metodo modificarPasajero
 
 
+/**METODO ESTAPASAJERO
+ * buscar en un array de obejtos pasajeros, si el pasajero ingresado ya se encuentra en la coleccion de objetos pasajeros  
+ * @param _nombre
+ * @param _apellido
+ * @param _dni
+ * @param _tel
+ * @return boolean
+ */
+private function estaPasajero($_dni){
+    // OBJ: arrayObjPasajero, pasajero         INT: contar
+    $arrObjPasajeros=$this->getPasajeros(); // almacena el array de objetos pasajeros
+    $contar=0;
+    $pasajero=$arrObjPasajeros[$contar]; // un objeto (de la clase pasajeros) pasajero del array
+    echo($pasajero);
+    $result=false; // determina si se encuentra o no el pasajero dentro de la colección
+
+    $dniPasajeroColeccion=$pasajero->getDni(); // almacena el DNI del 1er pasajero del array de objetos
+
+    while($_dni!=$dniPasajeroColeccion && $contar<sizeof($arrObjPasajeros)){
+        $contar=$contar+1;
+        echo("N°: ".$contar."\n");
+        $pasajero=$arrObjPasajeros[$contar]; //  NO SE POR QUE? ACA NO  ALMACENA 1 OBJETO DEL ARRAY DE OBJETO. POR ESO     
+        $dniPasajeroColeccion=$pasajero->getDni(); // DA ERROR EN ESTA LINEA
+        $result=true; 
+
+    }// fin while 
+
+    return $result;
+
+
+}// fin metodo estaPasajero
+
+/**METODO AGREGAR PASAJERO */
+public function agregarPasajero(){
+// STRING: nombre, apellido      INT: dni, telefono     BOOLEAN: seRepite   OBJ: colPasajero
+echo("Ingrese su nombre: \n");
+$nombre=trim(fgets(STDIN));
+echo("Ingrese su apellido \n");
+$apellido=trim(fgets(STDIN));
+echo("Ingrese su DNI \n");
+$dni=trim(fgets(STDIN));
+echo("Ingrese su telefono \n");
+$telefono=trim(fgets(STDIN));
+
+$seRepite=$this->estaPasajero($dni);
+
+if ($seRepite){
+    echo("El pasajero ya se encuentra en la lista de pasajeros\n");
+
+}
+else{
+    $tam=sizeof($this->getPasajeros());// determina el tamaño del array
+    $colPasajero=$this->getPasajeros();
+    $colPasajero[$tam+1]=new Pasajeros($nombre,$apellido,$dni,$telefono);// en la última posicion + 1 se guarda el obj pasajero
+}// fin else 
+
+
+}// fin metodo agregarPasajero
+
+
  // ***METODO toString***
- function __toString() // INCLUYE LOS DATOS DE UN SOLO PASAJERO 
+ function __toString() 
  {
      return "El viaje con codigo: ".$this->getCodigoViaje()." Tiene capacidad máxima de: ".$this->getCantMaxima()."  pasajeros"."\n".
-     "Se dirige al destino: ".$this->getDestinoViaje()."\n".
-     "Pasajero/a \n"
-     .($this->getPasajeros()["Nombre"])." ".($this->getPasajeros()["Apellido"])."    Dni: ".($this->getPasajeros()["Dni"])."\n";
+     "Se dirige al destino: ".$this->getDestinoViaje()."\n";
 
  }// fin toString 
 
